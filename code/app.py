@@ -8,7 +8,7 @@ app = Flask(__name__)
 @app.route('/')
 def reg():
     try:
-        with open('example.txt', 'r') as file:
+        with open('user_data.json', 'r') as file:
             content = file.read()
             return redirect(url_for('safety'))
     except FileNotFoundError:
@@ -26,4 +26,5 @@ def handle_error(error):
 
 
 if  __name__ == "__main__":
+
     app.run(debug=True)
