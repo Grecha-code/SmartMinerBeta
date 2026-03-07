@@ -1,15 +1,18 @@
 from flask import Flask, render_template, redirect, url_for, request
 from werkzeug.exceptions import HTTPException
+from dotenv import load_dotenv
 import psycopg2
 import sqlite3
 import hashlib
+import os
 
+load_dotenv()
 app = Flask(__name__)
-users_data = "postgresql://neondb_owner:npg_ZUq7GgwA3orX@ep-delicate-band-ai2tyz7b-pooler.c-4.us-east-1.aws.neon.tech/users_data?sslmode=require&channel_binding=require"
+users_data = os.getenv("users_data")
 
 
 def hashing(password):
-    return hashlib.sha512(password)
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
 
 def get_users_data():
@@ -42,9 +45,10 @@ def check_user_data(login, password):
 
 
 @app.route('/')
-def verify():
+def login_if_file_is_here():
     try:
         with open('user_data.db', 'r') as file:
+            file.read()
             return redirect(url_for('safety'))
     except FileNotFoundError:
         return render_template('registration.html')
@@ -54,13 +58,22 @@ def verify():
 def registration():
     if request.method == 'POST':
         login = request.form.get('login')
-        password = request.form.get('password')
+        password = hashing(request.form.get('password'))
+        print(password)
 
         if check_user_data(login, password):
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()
-            data = (login, hashing(password))
+            data = (login, password)
 
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    login TEXT NOT NULL,
+                    password TEXT NOT NULL,
+                    rights TEXT NOT NULL,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT
+                )
+            ''')
             cursor.execute("INSERT INTO users (login, password) VALUES (?, ?)", data)
 
             conn.commit()
