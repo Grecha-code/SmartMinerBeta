@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Статистика{% endblock %}
+{% block content %}
+<a href="{{ url_for('profile') }}" class="top-button">
+    <span style="font-size: 20px; filter: grayscale(100%) brightness(0) invert(1);">👤</span>
+</a>
+
+<div class="header">
+    <h1>Статистика</h1>
+    <p>Аналитика ваших показателей</p>
+</div>
+
+<div class="profile-card">
+    <div class="info-group">
+        <div class="info-label">Последний тест</div>
+        <div class="info-value" style="font-size: 24px;">{{ score }} <span style="font-size: 16px; color: #8c959f;">баллов</span></div>
+    </div>
+    <div class="info-group">
+        <div class="info-label">Позиция в шахте</div>
+        <div class="info-value">#{{ rank }}</div>
+    </div>
+    <div class="info-group">
+        <div class="info-label">Допущено к работе</div>
+        <div class="info-value">{{ total_users }} <span style="font-size: 16px; color: #8c959f;">чел.</span></div>
+    </div>
+</div>
+{% endblock %}

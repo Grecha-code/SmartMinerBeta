@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Экзамен{% endblock %}
+{% block content %}
+<div class="header">
+    <h1>Проверка знаний</h1>
+    <p style="color: #ffc107; font-weight: 800;">Тема: {{ module.title }}</p>
+</div>
+
+<form action="{{ url_for('submit_test') }}" method="POST">
+    {% for i in range(module.questions|length) %}
+    <div class="radio-group" style="animation-delay: {{ loop.index0 * 0.15 }}s;">
+        <p>{{ loop.index }}. {{ module.questions[i].q }}</p>
+        {% for j in range(module.questions[i].options|length) %}
+        <label>
+            <input type="radio" name="q{{ i }}" value="{{ j }}" required>
+            {{ module.questions[i].options[j] }}
+        </label>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <button type="submit" class="btn-main">ПОДТВЕРДИТЬ ОТВЕТЫ</button>
+</form>
+{% endblock %}

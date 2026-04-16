@@ -1,0 +1,368 @@
+/* Анимации */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes pulseBorder {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+body {
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    background: linear-gradient(-45deg, #1c1b1b, #2b2b2b, #4a3500, #1c1b1b);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    color: #e9ecef;
+    margin: 0;
+    padding: 0 0 80px 0;
+    min-height: 100vh;
+}
+
+.app-shell {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+h1 {
+    color: #ffc107;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+p {
+    line-height: 1.6;
+}
+
+/* Формы и инпуты */
+.form-group {
+    margin-bottom: 20px;
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+}
+.form-group:nth-child(1) { animation-delay: 0.1s; }
+.form-group:nth-child(2) { animation-delay: 0.2s; }
+
+.form-group input {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: 2px solid #495057;
+    background-color: #2b2b2b;
+    color: #fff;
+    box-sizing: border-box;
+    font-size: 16px;
+    font-family: "Montserrat", sans-serif;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #ffc107;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Кнопки */
+.btn-main {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 16px;
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color: #1c1b1b;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 16px;
+    border: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    box-sizing: border-box;
+    margin-top: 15px;
+    text-transform: uppercase;
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.btn-main:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(255, 193, 7, 0.3);
+}
+
+.btn-main:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 5px rgba(255, 193, 7, 0.3);
+}
+
+.btn-disabled {
+    background: #343a40;
+    color: #adb5bd;
+    cursor: not-allowed;
+    border: 1px dashed #495057;
+}
+.btn-disabled:hover { transform: none; box-shadow: none; }
+
+/* Карточки */
+.card, .profile-card {
+    background: rgba(43, 43, 43, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.card-highlight {
+    border-left: 4px solid #ffc107;
+}
+
+.theory-box {
+    background: rgba(255, 193, 7, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 193, 7, 0.2);
+    margin: 20px 0;
+}
+
+/* Профиль */
+.avatar-placeholder {
+    width: 130px;
+    height: 130px;
+    background: linear-gradient(135deg, var(--main-color, #863F3F), #2b2b2b);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 48px;
+    margin: 0 auto 20px;
+    font-weight: 800;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    animation: float 4s ease-in-out infinite;
+    border: 4px solid #343a40;
+}
+
+.info-group {
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideInRight 0.5s ease-out forwards;
+    opacity: 0;
+}
+.info-group:nth-child(2) { animation-delay: 0.1s; }
+.info-group:nth-child(3) { animation-delay: 0.2s; }
+.info-group:nth-child(4) { animation-delay: 0.3s; }
+.info-group:last-child { border-bottom: none; }
+
+.info-label {
+    font-size: 13px;
+    color: #8c959f;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.info-value {
+    font-size: 18px;
+    color: #ffc107;
+    font-weight: 800;
+}
+
+/* Тесты */
+.radio-group {
+    background: #2b2b2b;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+.radio-group p {
+    font-weight: 700;
+    font-size: 17px;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #ffc107;
+}
+
+.radio-group label {
+    display: block;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 12px;
+    background: #1c1b1b;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.radio-group label:hover {
+    background: #343a40;
+    transform: translateX(5px);
+}
+
+.radio-group input[type="radio"] {
+    accent-color: #ffc107;
+    margin-right: 10px;
+    transform: scale(1.2);
+}
+
+/* Навигация */
+.top-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    background: rgba(43, 43, 43, 0.9);
+    border: 1px solid rgba(255,193,7,0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+.top-button:hover {
+    transform: rotate(15deg) scale(1.1);
+    border-color: #ffc107;
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(28, 27, 27, 0.95);
+    backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: space-around;
+    padding: 15px 0;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+    z-index: 1000;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.nav-item {
+    color: #8c959f;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    flex-grow: 1;
+    text-align: center;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.nav-item:hover, .nav-item.active {
+    color: #ffc107;
+    transform: translateY(-3px);
+}
+
+/* Админ Панель */
+.admin-card {
+    border-top: 5px solid #ff4757;
+}
+
+.admin-link {
+    display: inline-block;
+    width: 94%;
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 71, 87, 0.1);
+    color: #ff4757;
+    border-radius: 12px;
+    font-weight: 800;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 71, 87, 0.3);
+    text-transform: uppercase;
+}
+
+.admin-link:hover {
+    background: #ff4757;
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(255, 71, 87, 0.3);
+}
+
+.rating-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.rating-table th {
+    background: #1c1b1b;
+    color: #ffc107;
+    padding: 15px;
+    text-align: left;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.rating-table td {
+    padding: 15px;
+    background: rgba(43, 43, 43, 0.5);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.3s ease;
+}
+
+.rating-table tr:hover td {
+    background: rgba(255, 193, 7, 0.1);
+}
+
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+}
+.status-yes { background: rgba(46, 213, 115, 0.2); color: #2ed573; }
+.status-no { background: rgba(255, 71, 87, 0.2); color: #ff4757; }

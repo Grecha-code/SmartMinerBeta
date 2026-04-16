@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Управление шахтой{% endblock %}
+{% block content %}
+<div class="header">
+    <h1 style="color: #ff4757;">КОМАНДНЫЙ ПУНКТ</h1>
+</div>
+
+<div class="card admin-card">
+    <h3 style="color: #fff; margin-bottom: 20px;">➕ Регистрация сотрудника</h3>
+    <form method="POST">
+        <div class="form-group">
+            <input type="text" name="new_login" placeholder="Новый табельный номер" required>
+        </div>
+        <div class="form-group">
+            <input type="password" name="new_password" placeholder="Установить пароль" required>
+        </div>
+        <button type="submit" class="btn-main" style="background: linear-gradient(135deg, #ff4757, #ff6b81); color: #fff;">ОФОРМИТЬ ДОПУСК</button>
+    </form>
+</div>
+
+<div class="card" style="padding: 15px;">
+    <h3 style="color: #fff; margin-bottom: 15px; padding-left: 10px;">📊 Сводка персонала</h3>
+    <div style="overflow-x: auto;">
+        <table class="rating-table">
+            <tr>
+                <th>ID / Логин</th>
+                <th>Доступ</th>
+                <th>Баллы</th>
+                <th>Статус</th>
+            </tr>
+            {% for u in users %}
+            <tr>
+                <td>
+                    <strong>#{{ u[0] }}</strong><br>
+                    <span style="color: #8c959f; font-size: 12px;">{{ u[1] }}</span>
+                </td>
+                <td>{{ '👑 Админ' if u[2] == 'Admin' else '👷 Рабочий' }}</td>
+                <td style="font-weight: 800; color: #ffc107;">{{ u[3] or 0 }}</td>
+                <td>
+                    {% if u[4] %}
+                        <span class="status-badge status-yes">ДОПУЩЕН</span>
+                    {% else %}
+                        <span class="status-badge status-no">ОЖИДАНИЕ</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

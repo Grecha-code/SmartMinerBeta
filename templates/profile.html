@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Профиль шахтёра{% endblock %}
+{% block content %}
+<div class="profile-card">
+    <div class="avatar-placeholder" style="--main-color: #{{ avatar_color }};">
+        {{ user[1][0] | upper }}
+    </div>
+
+    <div class="info-group">
+        <div class="info-label">Табельный ID</div>
+        <div class="info-value">#{{ user[0] }}</div>
+    </div>
+
+    <div class="info-group">
+        <div class="info-label">Позывной</div>
+        <div class="info-value">{{ user[1] }}</div>
+    </div>
+
+    <div class="info-group">
+        <div class="info-label">Класс допуска</div>
+        <div class="info-value">{{ user[2] }}</div>
+    </div>
+
+    {% if user[2] == 'Admin' %}
+        <a href="{{ url_for('admin_panel') }}" class="admin-link">⚙️ ПАНЕЛЬ УПРАВЛЕНИЯ</a>
+    {% endif %}
+
+    <a href="{{ url_for('safety') }}" class="btn-main" style="margin-top: 25px;">ВЕРНУТЬСЯ НА БАЗУ</a>
+</div>
+{% endblock %}

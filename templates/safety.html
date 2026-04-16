@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Инструктаж{% endblock %}
+{% block content %}
+  <a href="{{ url_for('profile') }}" class="top-button">
+      <span style="font-size: 20px; filter: grayscale(100%) brightness(0) invert(1);">👤</span>
+  </a>
+
+  <div class="header">
+      <h1>Инструктаж</h1>
+  </div>
+
+  {% if test_passed %}
+      <div class="card card-highlight" style="text-align: center;">
+          <div style="font-size: 50px; margin-bottom: 15px;">✅</div>
+          <h3>Допуск получен</h3>
+          <p style="color: #adb5bd;">Вы успешно сдали нормативы по технике безопасности.</p>
+          <div class="btn-main btn-disabled" style="margin-top: 20px;">ПРОЙДЕНО</div>
+      </div>
+  {% else %}
+      <div class="card card-highlight">
+          <h3>Внимание, шахтёр!</h3>
+          <p>Перед началом смены вы обязаны пройти динамический инструктаж и сдать тест.</p>
+
+          <div class="theory-box">
+              <h4 style="color: #ffc107; margin-top: 0; text-transform: uppercase;">{{ module.title }}</h4>
+              <p style="font-size: 15px; margin-bottom: 0;">{{ module.theory }}</p>
+          </div>
+
+          <a href="{{ url_for('test') }}" class="btn-main" style="animation: pulseBorder 2s infinite;">ПРИСТУПИТЬ К ТЕСТУ</a>
+      </div>
+  {% endif %}
+{% endblock %}
