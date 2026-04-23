@@ -307,7 +307,7 @@ p {
 
 .admin-link {
     display: inline-block;
-    width: 94%;
+    display: block;
     text-align: center;
     margin-top: 20px;
     padding: 15px;

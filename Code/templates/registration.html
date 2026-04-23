@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Регистрация{% endblock %}
+{% block content %}
+<div class="header">
+    <h1>Доступ в систему</h1>
+    <p>Введите данные вашей смены</p>
+</div>
+
+<form action="/" method="POST">
+    <div class="form-group">
+        <input type="text" name="login" placeholder="Логин" required autocomplete="off">
+    </div>
+    <div class="form-group">
+        <input type="password" name="password" placeholder="Пароль" required>
+    </div>
+
+    <div class="form-group" style="display: flex; gap: 15px; align-items: center;">
+        <div style="
+            background: repeating-linear-gradient(45deg, #1c1b1b, #1c1b1b 5px, #343a40 5px, #343a40 10px);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 900;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 26px;
+            letter-spacing: 6px;
+            color: rgba(255, 193, 7, 0.4);
+            text-decoration: line-through;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8), -1px -1px 0 rgba(255, 255, 255, 0.1);
+            transform: skewX(-15deg);
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #495057;
+        ">
+            {{ captcha_code }}
+
+            <div style="position: absolute; top: 40%; left: -10%; width: 120%; height: 2px; background: rgba(255, 71, 87, 0.5); transform: rotate(12deg);"></div>
+            <div style="position: absolute; top: 60%; left: -10%; width: 120%; height: 1px; background: rgba(255, 255, 255, 0.4); transform: rotate(-8deg);"></div>
+        </div>
+        <input type="text" name="captcha" placeholder="Код с картинки" required autocomplete="off" style="flex-grow: 1;">
+    </div>
+
+    {% if error %}<p style="color: #ff4757; text-align: center; font-size: 14px; font-weight: 600;">{{ error }}</p>{% endif %}
+
+    <button type="submit" class="btn-main">ПОДТВЕРДИТЬ ВХОД</button>
+</form>
+{% endblock %}

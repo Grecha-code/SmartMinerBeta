@@ -7,7 +7,10 @@ import os
 import g4f
 import json
 import re
+from datetime import date
 import random
+import webview
+from threading import Thread
 
 load_dotenv()
 app = Flask(__name__)
@@ -35,12 +38,16 @@ def init_db():
                     rights TEXT NOT NULL
                 )
             ''')
-
             cursor.execute(
                 "SELECT column_name FROM information_schema.columns WHERE table_name='users' AND column_name='test_passed';")
             if not cursor.fetchone():
                 cursor.execute(
                     "ALTER TABLE users ADD COLUMN test_passed BOOLEAN DEFAULT FALSE, ADD COLUMN test_score INTEGER DEFAULT 0;")
+
+            cursor.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name='users' AND column_name='last_test_date';")
+            if not cursor.fetchone():
+                cursor.execute("ALTER TABLE users ADD COLUMN last_test_date DATE;")
         conn.commit()
     except Exception:
         pass
@@ -57,14 +64,9 @@ def check_user_data(login, password):
                 cursor.execute("SELECT 1 FROM users WHERE login = %s AND password = %s LIMIT 1", (login, password))
                 exists = bool(cursor.fetchone())
 
-                if not exists:
-                    cursor.execute("INSERT INTO users (login, password, rights) VALUES (%s, %s, %s)",
-                                   (login, password, rights[0]))
-                    conn.commit()
-                    return True
-                return True
+                return exists
     except Exception as e:
-        print(e)
+        print(f"Ошибка базы данных: {e}")
         return False
 
 
@@ -72,6 +74,10 @@ def generate_safety_module():
     prompt = """
     Сгенерируй короткий обучающий модуль по технике безопасности для шахтеров.
     Ответь ТОЛЬКО валидным JSON форматом, без markdown разметки и лишнего текста.
+    Теория должна включать в себя текст, необходимый для прохождения теста. Теория и 
+    ответы в тесте не должны быть слишком очевидными, а также не должна быть такой,
+    как-будто шахтер видит её впервые. Создай все так, что это не простой тест из
+    интернета, а оригинальный и действительно полезный.
     Структура строго такая:
     {
         "title": "Название темы",
@@ -85,12 +91,30 @@ def generate_safety_module():
         ]
     }
     """
-    response = g4f.ChatCompletion.create(
-        model=g4f.models.gpt_4,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    cleaned = re.sub(r'```json\n|```', '', response).strip()
-    return json.loads(cleaned)
+    try:
+        response = g4f.ChatCompletion.create(
+            model=g4f.models.gpt_4,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        cleaned = re.sub(r'```json\n|```', '', response).strip()
+        return json.loads(cleaned)
+    except Exception:
+        return {
+            "title": "Базовые правила (Резервный модуль)",
+            "theory": "Всегда проверяйте уровень метана перед началом забоя. Ношение каски и самоспасателя — обязательно на всех участках шахты. При задымлении немедленно надевайте самоспасатель и двигайтесь к выходу.",
+            "questions": [
+                {"q": "Что нужно проверить перед забоем?", "options": ["Давление", "Уровень метана", "Температуру"],
+                 "correct": 1},
+                {"q": "Какая экипировка обязательна?", "options": ["Каска и самоспасатель", "Только перчатки", "Очки"],
+                 "correct": 0},
+                {"q": "Что делать при задымлении?", "options": ["Искать очаг", "Надеть самоспасатель и выйти", "Ждать"],
+                 "correct": 1},
+                {"q": "Можно ли включать технику при сломанной вентиляции?",
+                 "options": ["Да", "Только на 5 минут", "Категорически нет"], "correct": 2},
+                {"q": "Как реагировать на обрушение крепи?",
+                 "options": ["Отойти на безопасное расстояние", "Подпереть руками", "Подойти ближе"], "correct": 0}
+            ]
+        }
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -100,14 +124,27 @@ def registration():
 
     if request.method == 'POST':
         login = request.form.get('login')
-        password = hashing(request.form.get('miner_pass'))
+        password = hashing(request.form.get('password'))
+        user_captcha = request.form.get('captcha')
+
+        real_captcha = session.get('captcha_code')
+
+        if not real_captcha or str(user_captcha) != str(real_captcha):
+            session['captcha_code'] = str(random.randint(1000, 9999))
+            return render_template('registration.html', error="Неверный код с картинки",
+                                   captcha_code=session['captcha_code'])
 
         if check_user_data(login, password):
             response = make_response(redirect(url_for('safety')))
             response.set_cookie('user_login', login, max_age=90 * 24 * 60 * 60)
             return response
-        return render_template('registration.html')
-    return render_template('registration.html')
+
+        session['captcha_code'] = str(random.randint(1000, 9999))
+        return render_template('registration.html', error="Ошибка доступа или неверные данные",
+                               captcha_code=session['captcha_code'])
+
+    session['captcha_code'] = str(random.randint(1000, 9999))
+    return render_template('registration.html', captcha_code=session['captcha_code'])
 
 
 @app.route('/safety')
@@ -120,10 +157,18 @@ def safety():
     try:
         with psycopg2.connect(users_data) as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT test_passed FROM users WHERE login = %s", (login,))
+                cursor.execute("SELECT test_passed, last_test_date FROM users WHERE login = %s", (login,))
                 res = cursor.fetchone()
-                if res and res[0]:
-                    test_passed = True
+
+                if res:
+                    db_passed, last_date = res
+                    if db_passed and last_date != date.today():
+                        cursor.execute("UPDATE users SET test_passed = FALSE WHERE login = %s", (login,))
+                        conn.commit()
+                        test_passed = False
+                        session.pop('safety_module', None)
+                    else:
+                        test_passed = db_passed
     except Exception:
         pass
 
@@ -167,7 +212,13 @@ def submit_test():
     try:
         with psycopg2.connect(users_data) as conn:
             with conn.cursor() as cursor:
-                cursor.execute("UPDATE users SET test_passed = TRUE, test_score = %s WHERE login = %s", (score, login))
+                cursor.execute("""
+                    UPDATE users 
+                    SET test_passed = TRUE, 
+                        last_test_date = CURRENT_DATE,
+                        test_score = test_score + %s 
+                    WHERE login = %s
+                """, (score, login))
         conn.commit()
     except Exception:
         pass
@@ -223,23 +274,25 @@ def profile():
 @app.route('/admin_panel', methods=['GET', 'POST'])
 def admin_panel():
     login = request.cookies.get('user_login')
-    if not login: return redirect(url_for('registration'))
+    if not login or not session.get('admin_confirmed'):
+        return redirect(url_for('admin_auth'))
 
     try:
         with psycopg2.connect(users_data) as conn:
             with conn.cursor() as cursor:
-
                 cursor.execute("SELECT rights FROM users WHERE login = %s", (login,))
-                rights_res = cursor.fetchone()
-                if not rights_res or rights_res[0] != 'Admin':
+                user_rights = cursor.fetchone()
+
+                if not user_rights or user_rights[0] != 'Admin':
                     return redirect(url_for('safety'))
 
                 if request.method == 'POST':
                     new_login = request.form.get('new_login')
                     new_pass = hashing(request.form.get('new_password'))
+                    new_role = request.form.get('new_role')
 
                     cursor.execute("INSERT INTO users (login, password, rights) VALUES (%s, %s, %s)",
-                                   (new_login, new_pass, "User"))
+                                   (new_login, new_pass, new_role))
                     conn.commit()
 
                 cursor.execute("SELECT id, login, rights, test_score, test_passed FROM users ORDER BY test_score DESC")
@@ -250,10 +303,34 @@ def admin_panel():
         return render_template("error.html")
 
 
+@app.route('/admin_auth', methods=['GET', 'POST'])
+def admin_auth():
+    login = request.cookies.get('user_login')
+    if not login: return redirect(url_for('registration'))
+
+    if request.method == 'POST':
+        password = hashing(request.form.get('admin_pass'))
+        if check_user_data(login, password):
+            session['admin_confirmed'] = True
+            return redirect(url_for('admin_panel'))
+        return render_template('admin_auth.html', error="Неверный пароль администратора")
+
+    return render_template('admin_auth.html')
+
+
 @app.errorhandler(HTTPException)
 def handle_error(error):
     return render_template('error.html'), error.code
 
 
+def run_flask():
+    app.run(port=5000)
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    t = Thread(target=run_flask)
+    t.daemon = True
+    t.start()
+
+    webview.create_window('SmartMiner', 'http://127.0.0.1:5000')
+    webview.start()
