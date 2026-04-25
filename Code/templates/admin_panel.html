@@ -1,51 +1,67 @@
-{% extends "base.html" %}
-{% block title %}Управление шахтой{% endblock %}
+{% extends 'base.html' %}
+
+{% block title %}Управление персоналом | SmartMiner{% endblock %}
+
 {% block content %}
 <div class="header">
-    <h1 style="color: #ff4757;">КОМАНДНЫЙ ПУНКТ</h1>
+    <h1>Панель управления</h1>
+    <p>Регистрация персонала и мониторинг успеваемости</p>
 </div>
 
-<div class="card admin-card">
-    <h3 style="color: #fff; margin-bottom: 20px;">➕ Регистрация сотрудника</h3>
+<div class="card admin-card" style="margin-bottom: 30px; border-left: 4px solid #ffc107;">
+    <h3 style="color: #ffc107; margin-top: 0;">Добавить в базу</h3>
     <form method="POST">
         <div class="form-group">
-            <input type="text" name="new_login" placeholder="Новый табельный номер" required>
+            <input type="text" name="new_fio" placeholder="ФИО сотрудника" required>
+        </div>
+        <div class="form-group" style="display: flex; gap: 10px;">
+            <input type="text" name="new_login" placeholder="Логин (Табельный №)" required style="flex: 2;">
+            <input type="password" name="new_password" placeholder="Пароль" required style="flex: 1;">
         </div>
         <div class="form-group">
-            <input type="password" name="new_password" placeholder="Установить пароль" required>
+            <select name="new_role" style="width: 100%; padding: 15px; border-radius: 12px; background: #343a40; color: white; border: 1px solid #495057; font-family: inherit;">
+                <option value="Рабочий">Рабочий</option>
+                <option value="Admin">Администратор</option>
+            </select>
         </div>
-        <button type="submit" class="btn-main" style="background: linear-gradient(135deg, #ff4757, #ff6b81); color: #fff;">ОФОРМИТЬ ДОПУСК</button>
+        <button type="submit" class="btn-main" style="width: 100%; border: none; cursor: pointer;">ЗАРЕГИСТРИРОВАТЬ</button>
     </form>
 </div>
 
-<div class="card" style="padding: 15px;">
-    <h3 style="color: #fff; margin-bottom: 15px; padding-left: 10px;">📊 Сводка персонала</h3>
+<div class="card admin-card">
+    <h3 style="color: #ffc107; margin-top: 0;">Реестр сотрудников</h3>
     <div style="overflow-x: auto;">
-        <table class="rating-table">
-            <tr>
-                <th>ID / Логин</th>
-                <th>Доступ</th>
-                <th>Баллы</th>
-                <th>Статус</th>
-            </tr>
-            {% for u in users %}
-            <tr>
-                <td>
-                    <strong>#{{ u[0] }}</strong><br>
-                    <span style="color: #8c959f; font-size: 12px;">{{ u[1] }}</span>
-                </td>
-                <td>{{ '👑 Админ' if u[2] == 'Admin' else '👷 Рабочий' }}</td>
-                <td style="font-weight: 800; color: #ffc107;">{{ u[3] or 0 }}</td>
-                <td>
-                    {% if u[4] %}
-                        <span class="status-badge status-yes">ДОПУЩЕН</span>
-                    {% else %}
-                        <span class="status-badge status-no">ОЖИДАНИЕ</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; color: #e9ecef; font-size: 14px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #495057; text-align: left;">
+                    <th style="padding: 12px 8px;">ID</th>
+                    <th style="padding: 12px 8px;">ФИО</th>
+                    <th style="padding: 12px 8px;">Роль</th>
+                    <th style="padding: 12px 8px;">Успеваемость</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr style="border-bottom: 1px solid #343a40;">
+                    <td style="padding: 12px 8px; color: #adb5bd;">#{{ user.id }}</td>
+                    <td style="padding: 12px 8px;">
+                        <div style="font-weight: 600;">{{ user.fio }}</div>
+                        <div style="font-size: 11px; color: #888;">{{ user.login }}</div>
+                    </td>
+                    <td style="padding: 12px 8px;">
+                        <span style="padding: 3px 8px; border-radius: 4px; font-size: 11px; background: {{ '#ff4757' if user.role == 'Admin' else '#444' }};">
+                            {{ user.role }}
+                        </span>
+                    </td>
+                    <td style="padding: 12px 8px; color: {{ '#28a745' if user.percent > 75 else '#ffc107' }}; font-weight: 700;">
+                        {{ user.percent }}%
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
     </div>
 </div>
+
+<a href="{{ url_for('safety') }}" class="back-button" style="text-decoration: none; display: block; text-align: center;">ВЕРНУТЬСЯ В МЕНЮ</a>
 {% endblock %}

@@ -16,7 +16,6 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 users_data = os.getenv("users_data")
-rights = ["User", "Admin"]
 
 
 def hashing(password):
@@ -31,29 +30,33 @@ def init_db():
         conn = psycopg2.connect(users_data)
         with conn.cursor() as cursor:
             cursor.execute('''
-                CREATE TABLE IF NOT EXISTS users (
-                    id SERIAL PRIMARY KEY,
-                    login TEXT NOT NULL,
-                    password TEXT NOT NULL,
-                    rights TEXT NOT NULL
-                )
-            ''')
+                            CREATE TABLE IF NOT EXISTS users (
+                                id SERIAL PRIMARY KEY,
+                                login TEXT NOT NULL,
+                                password TEXT NOT NULL,
+                                rights TEXT NOT NULL,
+                                full_name TEXT,
+                                test_score INTEGER DEFAULT 0,
+                                total_questions INTEGER DEFAULT 0,
+                                test_passed BOOLEAN DEFAULT FALSE,
+                                last_test_date DATE
+                            )
+                        ''')
             cursor.execute(
-                "SELECT column_name FROM information_schema.columns WHERE table_name='users' AND column_name='test_passed';")
+                "SELECT column_name FROM information_schema.columns WHERE table_name='users' AND column_name='full_name';")
             if not cursor.fetchone():
-                cursor.execute(
-                    "ALTER TABLE users ADD COLUMN test_passed BOOLEAN DEFAULT FALSE, ADD COLUMN test_score INTEGER DEFAULT 0;")
+                cursor.execute("ALTER TABLE users ADD COLUMN full_name TEXT;")
 
             cursor.execute(
-                "SELECT column_name FROM information_schema.columns WHERE table_name='users' AND column_name='last_test_date';")
+                "SELECT column_name FROM information_schema.columns WHERE table_name='users' AND column_name='total_questions';")
             if not cursor.fetchone():
-                cursor.execute("ALTER TABLE users ADD COLUMN last_test_date DATE;")
+                cursor.execute("ALTER TABLE users ADD COLUMN total_questions INTEGER DEFAULT 0;")
+
         conn.commit()
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"DB Error: {e}")
     finally:
-        if conn:
-            conn.close()
+        if conn: conn.close()
 
 
 def check_user_data(login, password):
@@ -129,6 +132,10 @@ def registration():
 
         real_captcha = session.get('captcha_code')
 
+        agreement = request.form.get('agreement')
+        if not agreement:
+            return render_template('registration.html', error="Необходимо принять соглашение")
+
         if not real_captcha or str(user_captcha) != str(real_captcha):
             session['captcha_code'] = str(random.randint(1000, 9999))
             return render_template('registration.html', error="Неверный код с картинки",
@@ -145,6 +152,11 @@ def registration():
 
     session['captcha_code'] = str(random.randint(1000, 9999))
     return render_template('registration.html', captcha_code=session['captcha_code'])
+
+
+@app.route('/agreement')
+def agreement():
+    return render_template('agreement.html')
 
 
 @app.route('/safety')
@@ -194,15 +206,13 @@ def test():
 @app.route('/submit_test', methods=['POST'])
 def submit_test():
     login = request.cookies.get('user_login')
-    if not login:
-        return redirect(url_for('registration'))
-
     module = session.get('safety_module')
-    if not module:
+    if not login or not module:
         return redirect(url_for('safety'))
 
-    score = 0
     questions = module.get('questions', [])
+    score = 0
+    total_q = len(questions)
 
     for i, q in enumerate(questions):
         user_ans = request.form.get(f'q{i}')
@@ -216,12 +226,13 @@ def submit_test():
                     UPDATE users 
                     SET test_passed = TRUE, 
                         last_test_date = CURRENT_DATE,
-                        test_score = test_score + %s 
+                        test_score = test_score + %s,
+                        total_questions = total_questions + %s 
                     WHERE login = %s
-                """, (score, login))
+                """, (score, total_q, login)) # Теперь total_questions растет!
         conn.commit()
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"Ошибка сохранения теста: {e}")
 
     session.pop('safety_module', None)
     return redirect(url_for('safety'))
@@ -230,27 +241,28 @@ def submit_test():
 @app.route('/statistics')
 def statistics():
     login = request.cookies.get('user_login')
-    if not login:
-        return redirect(url_for('registration'))
+    if not login: return redirect(url_for('registration'))
 
-    score, rank, total_users = 0, 0, 0
     try:
         with psycopg2.connect(users_data) as conn:
             with conn.cursor() as cursor:
+
                 cursor.execute("SELECT test_score FROM users WHERE login = %s", (login,))
-                res = cursor.fetchone()
-                if res: score = res[0]
+                score = cursor.fetchone()[0]
 
                 cursor.execute("SELECT COUNT(*) FROM users WHERE test_score > %s", (score,))
-                higher_scores = cursor.fetchone()[0]
-                rank = higher_scores + 1
+                rank = cursor.fetchone()[0] + 1
 
-                cursor.execute("SELECT COUNT(*) FROM users WHERE test_passed = TRUE")
-                total_users = cursor.fetchone()[0]
+                cursor.execute("""
+                    SELECT full_name, login, test_score 
+                    FROM users 
+                    ORDER BY test_score DESC LIMIT 10
+                """)
+                leaders = cursor.fetchall()
+
+        return render_template('statistics.html', score=score, rank=rank, leaders=leaders, show_nav=True)
     except Exception:
-        pass
-
-    return render_template('statistics.html', score=score, rank=rank, total_users=total_users, show_nav=True)
+        return render_template("error.html")
 
 
 @app.route('/profile')
@@ -258,15 +270,19 @@ def profile():
     login = request.cookies.get('user_login')
     if not login: return redirect(url_for('registration'))
 
-    avatar_colors = ["863F3F", "3F6886", "5F3F86", "3F8662", "86683F"]
     try:
         with psycopg2.connect(users_data) as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT id, login, rights FROM users WHERE login = %s", (login,))
+                cursor.execute(
+                    "SELECT id, login, rights, full_name, test_score, total_questions FROM users WHERE login = %s",
+                    (login,))
                 user_info = cursor.fetchone()
-                if not user_info: return render_template("error.html")
-                return render_template('profile.html', user=user_info, avatar_color=random.choice(avatar_colors),
-                                       show_nav=True)
+
+                score = user_info[4]
+                total = user_info[5]
+                percent = round((score / total * 100), 1) if total > 0 else 0
+
+                return render_template('profile.html', user=user_info, percent=percent, avatar_color="863F3F")
     except Exception:
         return render_template("error.html")
 
@@ -274,6 +290,7 @@ def profile():
 @app.route('/admin_panel', methods=['GET', 'POST'])
 def admin_panel():
     login = request.cookies.get('user_login')
+
     if not login or not session.get('admin_confirmed'):
         return redirect(url_for('admin_auth'))
 
@@ -282,7 +299,6 @@ def admin_panel():
             with conn.cursor() as cursor:
                 cursor.execute("SELECT rights FROM users WHERE login = %s", (login,))
                 user_rights = cursor.fetchone()
-
                 if not user_rights or user_rights[0] != 'Admin':
                     return redirect(url_for('safety'))
 
@@ -290,16 +306,32 @@ def admin_panel():
                     new_login = request.form.get('new_login')
                     new_pass = hashing(request.form.get('new_password'))
                     new_role = request.form.get('new_role')
+                    new_fio = request.form.get('new_fio')
 
-                    cursor.execute("INSERT INTO users (login, password, rights) VALUES (%s, %s, %s)",
-                                   (new_login, new_pass, new_role))
+                    cursor.execute(
+                        "INSERT INTO users (login, password, rights, full_name) VALUES (%s, %s, %s, %s)",
+                        (new_login, new_pass, new_role, new_fio)
+                    )
                     conn.commit()
 
-                cursor.execute("SELECT id, login, rights, test_score, test_passed FROM users ORDER BY test_score DESC")
-                all_users = cursor.fetchall()
+                cursor.execute(
+                    "SELECT id, login, full_name, rights, test_score, total_questions FROM users ORDER BY id DESC")
+                raw_users = cursor.fetchall()
 
-        return render_template('admin_panel.html', users=all_users, show_nav=True)
-    except Exception:
+                users_list = []
+                for u in raw_users:
+                    percent = round((u[4] / u[5] * 100), 1) if u[5] > 0 else 0
+                    users_list.append({
+                        'id': u[0],
+                        'login': u[1],
+                        'fio': u[2],
+                        'role': u[3],
+                        'percent': percent
+                    })
+
+        return render_template('admin_panel.html', users=users_list, show_nav=True)
+    except Exception as e:
+        print(f"Ошибка админ-панели: {e}")
         return render_template("error.html")
 
 
@@ -328,6 +360,7 @@ def run_flask():
 
 
 if __name__ == "__main__":
+    print(hashing('4444'))
     t = Thread(target=run_flask)
     t.daemon = True
     t.start()
