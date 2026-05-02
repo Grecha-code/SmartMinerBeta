@@ -1,4 +1,4 @@
-/* Анимации */
+/* main.css */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(40px); }
     to { opacity: 1; transform: translateY(0); }
@@ -64,7 +64,6 @@ p {
     line-height: 1.6;
 }
 
-/* Формы и инпуты */
 .form-group {
     margin-bottom: 20px;
     animation: fadeInUp 0.5s ease-out forwards;
@@ -93,7 +92,6 @@ p {
     transform: translateY(-2px);
 }
 
-/* Кнопки */
 .btn-main {
     display: block;
     width: 100%;
@@ -122,6 +120,7 @@ p {
 .btn-main:active {
     transform: translateY(1px);
     box-shadow: 0 2px 5px rgba(255, 193, 7, 0.3);
+    filter: brightness(0.9);
 }
 
 .btn-disabled {
@@ -132,7 +131,6 @@ p {
 }
 .btn-disabled:hover { transform: none; box-shadow: none; }
 
-/* Карточки */
 .card, .profile-card {
     background: rgba(43, 43, 43, 0.85);
     backdrop-filter: blur(10px);
@@ -156,7 +154,6 @@ p {
     margin: 20px 0;
 }
 
-/* Профиль */
 .avatar-placeholder {
     width: 130px;
     height: 130px;
@@ -202,7 +199,6 @@ p {
     font-weight: 800;
 }
 
-/* Тесты */
 .radio-group {
     background: #2b2b2b;
     padding: 20px;
@@ -243,7 +239,6 @@ p {
     transform: scale(1.2);
 }
 
-/* Навигация */
 .top-button {
     position: absolute;
     top: 20px;
@@ -300,7 +295,6 @@ p {
     transform: translateY(-3px);
 }
 
-/* Админ Панель */
 .admin-card {
     border-top: 5px solid #ff4757;
 }
@@ -366,3 +360,242 @@ p {
 }
 .status-yes { background: rgba(46, 213, 115, 0.2); color: #2ed573; }
 .status-no { background: rgba(255, 71, 87, 0.2); color: #ff4757; }
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo-text {
+    color: #ffc107;
+    margin-bottom: 5px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 20px;
+}
+
+.subtitle-text {
+    color: #adb5bd;
+    font-size: 14px;
+}
+
+.auth-card {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.form-label {
+    color: #888;
+    font-size: 12px;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.form-input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    background: #2b2b2b;
+    color: white;
+    border: 2px solid #495057;
+    font-family: inherit;
+}
+
+.form-group-spaced {
+    margin-top: 15px;
+}
+
+.captcha-section {
+    margin-top: 20px;
+}
+
+.captcha-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.captcha-box {
+    background: repeating-linear-gradient(45deg, #1c1b1b, #1c1b1b 5px, #343a40 5px, #343a40 10px);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: 900;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 24px;
+    letter-spacing: 5px;
+    color: rgba(255, 193, 7, 0.4);
+    text-decoration: line-through;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    transform: skewX(-10deg);
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #495057;
+    min-width: 100px;
+    text-align: center;
+}
+
+.captcha-line1 {
+    position: absolute;
+    top: 45%;
+    left: -10%;
+    width: 120%;
+    height: 2px;
+    background: rgba(255, 71, 87, 0.3);
+    transform: rotate(10deg);
+}
+
+.captcha-line2 {
+    position: absolute;
+    top: 55%;
+    left: -10%;
+    width: 120%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(-5deg);
+}
+
+.captcha-input {
+    flex-grow: 1;
+}
+
+.agreement-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.agreement-checkbox {
+    width: auto;
+    margin-top: 4px;
+    cursor: pointer;
+}
+
+.agreement-label {
+    font-size: 11px;
+    color: #adb5bd;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.agreement-link {
+    color: #ffc107;
+    text-decoration: underline;
+}
+
+.error-box {
+    background: rgba(255, 71, 87, 0.1);
+    border: 1px solid #ff4757;
+    color: #ff4757;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-size: 13px;
+    text-align: center;
+}
+
+.submit-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.profile-name {
+    color: #fff;
+    margin-top: 10px;
+}
+
+.text-success {
+    color: #28a745;
+    font-weight: 700;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    background: #e9ecef;
+    border-radius: 10px;
+    height: 8px;
+    margin-top: 5px;
+}
+
+.progress-bar-fill {
+    background: #28a745;
+    height: 100%;
+    border-radius: 10px;
+}
+
+.back-button {
+    display: block;
+    text-align: center;
+    color: #ffc107;
+    text-decoration: none;
+    margin-top: 20px;
+    font-weight: 800;
+    transition: all 0.3s;
+}
+
+.back-button:hover {
+    color: #fff;
+}
+
+.admin-tools {
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+    margin-top: 15px;
+}
+
+.highlight-label {
+    color: #ffc107;
+}
+
+.admin-btn {
+    display: block;
+    text-align: center;
+    background: #343a40;
+    color: #ffc107;
+    border: 1px solid #ffc107;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff4757, #c0392b);
+    color: #fff;
+    margin-top: 30px;
+}
+
+.btn-danger:hover {
+    box-shadow: 0 10px 20px rgba(255, 71, 87, 0.3);
+}
+
+.delete-form {
+    margin-top: 20px;
+}
+.btn-secondary {
+    background: #495057;
+    color: #e9ecef;
+}
+
+.btn-secondary:hover {
+    background: #6c757d;
+    box-shadow: 0 10px 20px rgba(108, 117, 125, 0.3);
+}
+
+.btn-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #ffc107;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.2);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}

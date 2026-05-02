@@ -3,91 +3,97 @@
 {% block title %}Вход в систему | SmartMiner{% endblock %}
 
 {% block content %}
-<div class="header" style="text-align: center; margin-bottom: 30px;">
-    <h1 style="color: #ffc107; margin-bottom: 5px;">SmartMiner</h1>
-    <p style="color: #adb5bd; font-size: 14px;">Авторизация в системе безопасности</p>
+<style>
+    .captcha-wrapper {
+        margin-bottom: 20px;
+    }
+    .captcha-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+        background: #f4f4f4;
+        padding: 15px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+    }
+    .captcha-container img {
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        user-select: none;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+    .captcha-container img:active {
+        opacity: 0.7;
+    }
+    .captcha-container input {
+        text-align: center;
+        letter-spacing: 2px;
+        font-weight: bold;
+        text-transform: uppercase;
+        width: 100%;
+    }
+</style>
+
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p class="loading-label">Выполняется вход...</p>
 </div>
 
-<div class="card" style="max-width: 400px; margin: 0 auto; animation: fadeInUp 0.5s ease;">
-    <form action="/" method="POST">
+<div class="auth-header">
+    <h1 class="logo-text">SmartMiner</h1>
+    <p class="subtitle-text">Авторизация в системе безопасности</p>
+</div>
+
+<div class="card auth-card">
+    <form action="/" method="POST" id="login-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
         <div class="form-group">
-            <label style="color: #888; font-size: 12px; margin-bottom: 5px; display: block;">Табельный номер или логин</label>
-            <input type="text" name="login" placeholder="Введите ваш логин" required autocomplete="off"
-                   style="width: 100%; padding: 15px; border-radius: 12px; background: #2b2b2b; color: white; border: 2px solid #495057; font-family: inherit;">
+            <label class="form-label">Табельный номер или логин</label>
+            <input type="text" name="login" placeholder="Введите ваш логин" required autocomplete="off" class="form-input" maxlength="64">
         </div>
 
-        <div class="form-group" style="margin-top: 15px;">
-            <label style="color: #888; font-size: 12px; margin-bottom: 5px; display: block;">Пароль</label>
-            <input type="password" name="password" placeholder="Введите пароль" required
-                   style="width: 100%; padding: 15px; border-radius: 12px; background: #2b2b2b; color: white; border: 2px solid #495057; font-family: inherit;">
+        <div class="form-group form-group-spaced">
+            <label class="form-label">Пароль</label>
+            <input type="password" name="password" placeholder="Введите пароль" required class="form-input" maxlength="256">
         </div>
 
-        <div style="margin-top: 20px;">
-            <label style="color: #888; font-size: 12px; margin-bottom: 5px; display: block;">Проверка безопасности</label>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <div id="captcha-box" style="
-                    background: repeating-linear-gradient(45deg, #1c1b1b, #1c1b1b 5px, #343a40 5px, #343a40 10px);
-                    padding: 10px 15px;
-                    border-radius: 8px;
-                    font-weight: 900;
-                    font-family: 'Courier New', Courier, monospace;
-                    font-size: 24px;
-                    letter-spacing: 5px;
-                    color: rgba(255, 193, 7, 0.4);
-                    text-decoration: line-through;
-                    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-                    transform: skewX(-10deg);
-                    user-select: none;
-                    position: relative;
-                    overflow: hidden;
-                    border: 1px solid #495057;
-                    min-width: 100px;
-                    text-align: center;
-                ">
-                    {{ captcha_code }}
-                    <div style="position: absolute; top: 45%; left: -10%; width: 120%; height: 2px; background: rgba(255, 71, 87, 0.3); transform: rotate(10deg);"></div>
-                    <div style="position: absolute; top: 55%; left: -10%; width: 120%; height: 1px; background: rgba(255, 255, 255, 0.2); transform: rotate(-5deg);"></div>
-                </div>
-                <input type="text" name="captcha" placeholder="Код" required autocomplete="off"
-                       style="flex-grow: 1; padding: 15px; border-radius: 12px; background: #2b2b2b; color: white; border: 2px solid #495057; font-family: inherit;">
+        <div class="captcha-wrapper">
+            <label class="form-label">Пройдите проверку (нажмите на картинку для обновления)</label>
+            <div class="captcha-container">
+                <img src="{{ url_for('captcha_image') }}" alt="CAPTCHA" title="Обновить капчу" onclick="this.src='{{ url_for('captcha_image') }}?' + Date.now()">
+                <input type="text" name="captcha_input" placeholder="Код с картинки" required class="form-input" maxlength="5">
             </div>
         </div>
 
-        <div style="display: flex; align-items: flex-start; gap: 10px; margin-top: 20px;">
-            <input type="checkbox" name="agreement" id="agreement" required style="width: auto; margin-top: 4px; cursor: pointer;">
-            <label for="agreement" style="font-size: 11px; color: #adb5bd; line-height: 1.4; cursor: pointer;">
+        <div class="agreement-box">
+            <input type="checkbox" name="agreement" id="agreement" required class="agreement-checkbox">
+            <label for="agreement" class="agreement-label">
                 Я подтверждаю, что ознакомлен с
-                <a href="{{ url_for('agreement') }}" target="_blank" style="color: #ffc107; text-decoration: underline;">
-                    пользовательским соглашением
-                </a> и принимаю на себя ответственность за соблюдение ТБ.
+                <a href="{{ url_for('agreement') }}" target="_blank" class="agreement-link">пользовательским соглашением</a>
+                и принимаю на себя ответственность за соблюдение ТБ.
             </label>
         </div>
 
         {% if error %}
-        <div style="background: rgba(255, 71, 87, 0.1); border: 1px solid #ff4757; color: #ff4757; padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 13px; text-align: center;">
-            {{ error }}
-        </div>
+        <div class="error-box">{{ error }}</div>
         {% endif %}
 
-        <button type="submit" class="btn-main" style="width: 100%; margin-top: 20px; padding: 16px; border: none; font-weight: 700; letter-spacing: 1px; cursor: pointer;">
+        <button type="submit" class="btn-main submit-btn" id="submit-btn">
             ПОДТВЕРДИТЬ ВХОД
         </button>
     </form>
 </div>
 
-<style>
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .btn-main:active {
-        transform: scale(0.98);
-        filter: brightness(0.9);
-    }
-    input:focus {
-        outline: none;
-        border-color: #ffc107 !important;
-        box-shadow: 0 0 10px rgba(255, 193, 7, 0.1);
-    }
-</style>
+<script>
+    document.getElementById('login-form').addEventListener('submit', function () {
+        var overlay = document.getElementById('loading-overlay');
+        var btn = document.getElementById('submit-btn');
+        overlay.classList.add('visible');
+        btn.disabled = true;
+        btn.textContent = 'ВЫПОЛНЯЕТСЯ ВХОД...';
+    });
+</script>
 {% endblock %}

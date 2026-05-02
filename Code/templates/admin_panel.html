@@ -11,15 +11,16 @@
 <div class="card admin-card" style="margin-bottom: 30px; border-left: 4px solid #ffc107;">
     <h3 style="color: #ffc107; margin-top: 0;">Добавить в базу</h3>
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <div class="form-group">
-            <input type="text" name="new_fio" placeholder="ФИО сотрудника" required>
+            <input type="text" name="new_fio" placeholder="ФИО сотрудника" required class="form-input" maxlength="128">
         </div>
         <div class="form-group" style="display: flex; gap: 10px;">
-            <input type="text" name="new_login" placeholder="Логин (Табельный №)" required style="flex: 2;">
-            <input type="password" name="new_password" placeholder="Пароль" required style="flex: 1;">
+            <input type="text" name="new_login" placeholder="Логин (Табельный №)" required class="form-input" style="flex: 2;" maxlength="64">
+            <input type="password" name="new_password" placeholder="Пароль" required class="form-input" style="flex: 1;" maxlength="256">
         </div>
         <div class="form-group">
-            <select name="new_role" style="width: 100%; padding: 15px; border-radius: 12px; background: #343a40; color: white; border: 1px solid #495057; font-family: inherit;">
+            <select name="new_role" class="form-input" style="padding: 15px; border-radius: 12px; background: #343a40; color: white; border: 1px solid #495057; font-family: inherit;">
                 <option value="Рабочий">Рабочий</option>
                 <option value="Admin">Администратор</option>
             </select>

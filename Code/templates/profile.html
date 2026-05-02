@@ -9,21 +9,12 @@
         <div class="avatar-placeholder" style="--main-color: #{{ avatar_color }};">
             {{ user[3][0] if user[3] else user[1][0] | upper }}
         </div>
-        <h2 style="color: #222; margin-top: 10px;">{{ user[3] if user[3] else "ФИО не указано" }}</h2>
+        <h2 class="profile-name">{{ user[3] if user[3] else "ФИО не указано" }}</h2>
     </div>
 
     <div class="info-group">
-        <div class="info-label">Логин / Табельный номер</div>
+        <div class="info-label">Табельный номер</div>
         <div class="info-value">{{ user[1] }}</div>
-    </div>
-
-    <div class="info-group">
-        <div class="info-label">Успеваемость (КПД)</div>
-        <div class="info-value" style="color: #28a745; font-weight: 700;">{{ percent }}% правильных ответов</div>
-    </div>
-
-    <div style="width: 100%; background: #e9ecef; border-radius: 10px; height: 8px; margin-top: 5px;">
-        <div style="width: {{ percent }}%; background: #28a745; height: 100%; border-radius: 10px;"></div>
     </div>
 
     <div class="info-group">
@@ -31,15 +22,27 @@
         <div class="info-value">{{ user[2] }}</div>
     </div>
 
-    <a href="{{ url_for('safety') }}" class="back-button">НА ГЛАВНУЮ</a>
-    {% if user[2] == 'Admin' %}
-    <div class="info-group" style="border-top: 1px solid #ddd; padding-top: 15px; margin-top: 15px;">
-        <div class="info-label" style="color: #ffc107;">Инструменты управления</div>
-        <a href="{{ url_for('admin_panel') }}" class="btn-main"
-           style="display: block; text-align: center; background: #343a40; color: #ffc107; border: 1px solid #ffc107; text-decoration: none; padding: 10px; border-radius: 8px; margin-top: 10px;">
-            ОТКРЫТЬ АДМИН-ПАНЕЛЬ
-        </a>
+    <div class="info-group">
+        <div class="info-label">Успеваемость (КПД)</div>
+        <div class="info-value">{{ percent }}%</div>
     </div>
-    {% endif %}
+
+    <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width: {{ percent }};"></div>
+    </div>
+
+    <div class="profile-actions">
+        <a href="{{ url_for('safety') }}" class="btn-main">НА ГЛАВНУЮ</a>
+
+        {% if user[2] == 'Admin' %}
+        <a href="{{ url_for('admin_panel') }}" class="btn-main btn-outline">ОТКРЫТЬ АДМИН-ПАНЕЛЬ</a>
+        {% endif %}
+
+        <form action="{{ url_for('delete_account') }}" method="POST"
+              onsubmit="return confirm('Внимание! Вы уверены, что хотите удалить аккаунт? Это действие необратимо.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn-main btn-danger">УДАЛИТЬ АККАУНТ</button>
+        </form>
+    </div>
 </div>
 {% endblock %}

@@ -7,8 +7,9 @@
 
 <div class="card" style="border-top: 4px solid #ff4757;">
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <div class="form-group">
-            <input type="password" name="admin_pass" placeholder="Ваш пароль" required autofocus>
+            <input type="password" name="admin_pass" placeholder="Ваш пароль" required autofocus class="form-input" maxlength="256">
         </div>
         {% if error %}<p style="color: #ff4757; text-align: center;">{{ error }}</p>{% endif %}
         <button type="submit" class="btn-main" style="background: #ff4757; color: white;">ПОДТВЕРДИТЬ ЛИЧНОСТЬ</button>

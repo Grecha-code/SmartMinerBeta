@@ -7,6 +7,7 @@
 </div>
 
 <form action="{{ url_for('submit_test') }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     {% for i in range(module.questions|length) %}
     <div class="radio-group" style="animation-delay: {{ loop.index0 * 0.15 }}s;">
         <p>{{ loop.index }}. {{ module.questions[i].q }}</p>

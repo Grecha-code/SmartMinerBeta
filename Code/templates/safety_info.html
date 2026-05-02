@@ -15,6 +15,8 @@
     <p><strong>5. ЧС:</strong> При обнаружении признаков пожара или задымления незамедлительно сообщите диспетчеру и включитесь в самоспасатель.</p>
 </div>
 
-<a href="{{ url_for('test') }}" class="btn-main">Перейти к тесту</a>
-<a href="{{ url_for('safety') }}" class="btn-main" style="background-color: #495057; color: #fff;">Вернуться назад</a>
+<div class="btn-row">
+    <a href="{{ url_for('test') }}" class="btn-main">Перейти к тесту</a>
+    <a href="{{ url_for('safety') }}" class="btn-main btn-secondary">Вернуться назад</a>
+</div>
 {% endblock %}
